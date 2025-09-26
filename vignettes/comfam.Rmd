@@ -19,6 +19,15 @@ knitr::opts_chunk$set(
   message = FALSE,
   warning = FALSE
 )
+
+# Load devtools to reload the package
+if (!requireNamespace("devtools", quietly = TRUE)) {
+  install.packages("devtools")
+}
+library(devtools)
+
+# Load all functions from ComBatFamily
+load_all()  # this loads exported AND non-exported functions like combat_gam()
 ```
 
 The ComBat Family extends the original ComBat methodology to enable flexible
