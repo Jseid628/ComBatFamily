@@ -1,0 +1,125 @@
+---
+title: "ToyExample"
+output: html_document
+---
+
+## Creating a toy data set and running ComBat
+```{r}
+suppressPackageStartupMessages({
+  library(neuroCombat)
+  library(ComBatFamily)
+})
+
+# generate toy dataset
+set.seed(8888)
+# number of patients
+n <- 20
+# number of features
+p <- 5
+bat <- as.factor(c(rep("a", n/2), rep("b", n/2)))
+# number of biological covariates
+q <- 2
+# two biological covariates for each patient
+covar <- matrix(rnorm(n*q), n, q)
+# Cols of biological covariates called X1, X2
+colnames(covar) <- paste0("x", 1:q)
+# these are the p features for the n patients
+data <- data.frame(matrix(rnorm(n*p), n, p))
+
+# cf is the output of the comfam function.
+# this is what I want to investigate
+cf <- comfam(data, bat, covar, lm, formula = y ~ x1 + x2)
+
+```
+
+
+## The output of the comfam function
+```{r}
+# it is of class "comfam"
+class(cf)
+```
+
+```{r}
+# Accessing the 4 values in comfam output.
+message("dat.combat")
+cf$dat.combat
+class(cf$dat.combat)
+
+message("batch.info")
+
+cf$batch.info
+class(cf$batch.info)
+
+message("fits")
+
+str(cf$fits, max.level = 1)
+class(cf$fits)
+
+message("estimates")
+cf$estimates
+class(cf$estimates)
+```
+
+```{r}
+message("cf$batch.info$batch")
+cf$batch.info$batch
+class(cf$batch.info$batch)
+
+message("cf$batch.info$batch.mod")
+cf$batch.info$batch.mod
+class(cf$batch.info$batch.mod)
+
+
+```
+
+## Creating new data for the predict.comfam function
+```{r}
+# different number of patients
+n <- 10
+# SAME number of features!
+p <- 5
+# suppose the subjects constitute a new batch.
+bat <- as.factor(c(rep("c", n)))
+
+# Say now we are measuring a different number of covariates.
+q <- 3
+newcovar <- matrix(rnorm(n*q), n, q)
+colnames(newcovar) <- paste0("x", 1:q)
+
+# these are the p features for the n patients
+data <- data.frame(matrix(rnorm(n*p), n, p))
+```
+
+```{r}
+message("newcovar")
+newcovar
+
+message("data")
+data
+```
+
+```{r}
+predict.comfam <- function(object, newdata, newbat, newcovar = NULL,
+                           robust.LS = FALSE, eb = TRUE, ...) {
+
+  
+  # The new data is cast as a matrix and its number of rows and columns are read
+  data <- as.matrix(newdata)
+  n <- nrow(data)
+  p <- ncol(data)
+  
+  # take the batch info from the comfam output.
+  bat <- object$batch.info$batch
+  
+  batch_mod <- object$batch.info$batch.mod
+  stand_mean <- object$estimates$stand.mean
+  var_pooled <- object$estimates$var.pooled
+  gamma_hat <- object$estimates$gamma.hat
+  delta_hat <- object$estimates$delta.hat
+  gamma_star <- object$estimates$gamma.star
+  delta_star <- object$estimates$delta.star
+  fits <- object$fits
+}
+```
+
+
