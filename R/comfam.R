@@ -98,8 +98,10 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
   if (is.null(covar)) {
     mod <- data.frame(I(batch))
   } else {
+    # this is the design matrix
     mod <- data.frame(covar, I(batch))
   }
+
 
   if (is.null(covar) | is.null(formula)) {
     formula <- y ~ 1
@@ -234,6 +236,8 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
   # Remove batch effects
   data_nb <- data_stand
   for (i in 1:nlevels(bat)) {
+    # get the rows in data_stand corresponding to batch i.
+    # subtract column wise the values of gamma_star[i, ]
     data_nb[batches[[i]],] <- sweep(data_nb[batches[[i]],, drop = FALSE], 2,
                                     gamma_star[i,], "-")
     data_nb[batches[[i]],] <- sweep(data_nb[batches[[i]],, drop = FALSE], 2,
@@ -279,6 +283,7 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
 #'
 #' @param object Object of class `comfam`, typically output of
 #'   \link[ComBatFamily]{comfam}
+#'
 #' @param newdata \emph{n x p} data frame or matrix of new observations where
 #'   \emph{p} is the number of features and \emph{n} is the number of subjects.
 #'   The features must match the original `data` used in `object`
@@ -314,6 +319,7 @@ comfam <- function(data, bat, covar = NULL, model = lm, formula = NULL,
 #' max(in_pred$dat.combat - com_out$dat.combat[1:25,])
 predict.comfam <- function(object, newdata, newbat, newcovar = NULL,
                            robust.LS = FALSE, eb = TRUE, ...) {
+
   # model_class <- class(object$fits[[1]])
   # if (c("lm", "rq", "gam", "lmerMod") %in% model_class) {
   #   cat("Applying out-of-sample using model of class", model_class, "/n")
